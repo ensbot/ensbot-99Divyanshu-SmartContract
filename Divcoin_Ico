@@ -1,0 +1,67 @@
+// divcoin ICO 
+
+// Version of compiler
+pragma solidity ^0.5.1; //check if compiler version same as passed by pragma if not then wont work.
+
+//Start contract
+
+contract divcoin_ico
+{
+    //Defining contract
+    
+    // Introducing the maximum/total  no. of divcoins available for sale.
+    uint public max_divcoin = 1000000; // public or visible to everyone .
+    
+    // Intoducing INR to divcoins conversion rate.
+    uint public inr_to_divcoin = 1000; // 1 INR = 1000 Divcoin.
+    
+    // Introducing the total no. of Divcoin bought up by the investors.
+    uint public total_divcoins_bought = 0;
+    
+    // Mapping from the investors address to its equity in divcoin and INR.
+    // Mapping is works like an array which takes in input the the address and returns the equity in divcoin & INR 
+    mapping(address => uint) equity_divcoins;
+    mapping(address => uint) equity_INR;
+    // address is a type in solidity(here input).
+    // type of output is uint(address => uint).
+    //"equity_divcoins" will store the integer value returned .
+    
+    // Checking if an investor can buy divcoins.
+    // For this we use a tool of solidity called "modifier".
+    // We'll check if money invested in divcoins + total bought divcoins <= 1000000 (for that we'll use "require" like if condition)
+    modifier can_buy_divcoins(uint INR_invested)
+    {
+        require(INR_invested*inr_to_divcoin + total_divcoins_bought <= max_divcoin);
+        _;
+    }// if the require is true then function linked to modifier is executed.
+
+    // Getting the equity in divcoins of investor.
+    function equity_in_divcoins(address investor) external view returns(uint)// function to get equity in divcoins with argument as address of investor(address is type)
+    {
+        return equity_divcoins[investor];
+    }
+
+    // Getting the equity in INR of investor.
+    function equity_in_inr(address investor) external view returns(uint)// function to get equity in divcoins with argument as address of investor(address is type)
+    {
+        return equity_INR[investor];
+    }
+
+    // Buy divcoins function that'll update eqities and total divcoins bought.
+    function buy_divcoins(address investor , uint INR_invested) external 
+    can_buy_divcoins(INR_invested) //modifier used to check if can buy divcoins.
+    {
+        equity_divcoins[investor]+=INR_invested*inr_to_divcoin;
+        equity_INR[investor]+=INR_invested;
+        total_divcoins_bought+=INR_invested*inr_to_divcoin;
+    }
+
+    //Sell divcoins(BUyback)
+    function sell_divcoins(address investor , uint divcoins_to_sell) external 
+    {
+        equity_divcoins[investor]-=divcoins_to_sell;
+        equity_INR[investor]-=divcoins_to_sell/inr_to_divcoin;
+        total_divcoins_bought-=divcoins_to_sell;
+    }
+}
+
